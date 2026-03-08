@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Block Strike HTML</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <div id="ui-root">
+    <div id="menu" class="panel menu-classic active">
+      <h1>BLOCK STRIKE HTML</h1>
+      <p class="sub">Классический интерфейс, улучшенная графика и крупное обновление геймплея.</p>
+
+      <div class="grid">
+        <label>Режим
+          <select id="mode">
+            <option value="duel">Дуэль 1x1</option>
+            <option value="team">Командный 5x5</option>
+            <option value="zombie">Зомби-инфекция</option>
+            <option value="elim">Без возрождений 5x5</option>
+          </select>
+        </label>
+
+        <label>Карта
+          <select id="map"></select>
+        </label>
+
+        <label>Сложность ботов
+          <select id="difficulty">
+            <option value="easy">Легкая</option>
+            <option value="normal" selected>Средняя</option>
+            <option value="hard">Сложная</option>
+          </select>
+        </label>
+
+        <label>Чувствительность
+          <input id="sens" type="range" min="0.0015" max="0.006" step="0.0005" value="0.003" />
+        </label>
+      </div>
+
+      <div id="mode-desc" class="case-log">Описание выбранного режима появится здесь.</div>
+      <div id="difficulty-desc" class="case-log">Профиль ботов появится здесь.</div>
+
+      <div class="grid mini-grid">
+        <label>Кейсы: <span id="cases">3</span>
+          <button id="open-case" type="button">Открыть кейс</button>
+        </label>
+
+        <label>Скин
+          <select id="skin-select"></select>
+        </label>
+      </div>
+
+      <div id="case-log" class="case-log">Открой кейс, чтобы получить новый скин.</div>
+      <div class="auth-row">
+        <input id="auth-user" type="text" placeholder="Ник (логин)" />
+        <button id="auth-login" type="button">Войти</button>
+      </div>
+      <div id="auth-status" class="case-log">Аккаунт: не авторизован.</div>
+
+      <div class="grid mini-grid">
+        <label>Режим запуска
+          <select id="launch-mode">
+            <option value="local">Локально (боты)</option>
+            <option value="multiplayer">Мультиплеер</option>
+          </select>
+        </label>
+        <label class="mp-only">Сторона (как в CS2)
+          <select id="mp-team">
+            <option value="">Выбери сторону</option>
+            <option value="ct">CT</option>
+            <option value="t">T</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="net-row mp-only">
+        <input id="ws-url" type="text" placeholder="wss://gamefeatq.onrender.com" value="wss://gamefeatq.onrender.com" readonly />
+        <input id="room-id" type="text" placeholder="ID комнаты (например: bs123)" />
+        <button id="play-together" type="button">Присоединиться</button>
+      </div>
+
+      <div class="grid mini-grid mp-only">
+        <label>Боты в мультиплеере
+          <select id="mp-bots">
+            <option value="without_bots">Без ботов</option>
+            <option value="with_bots">С ботами (хост)</option>
+          </select>
+        </label>
+        <label>Готовность
+          <button id="mp-ready" type="button">Я готов</button>
+        </label>
+      </div>
+
+      <div id="lobby-status" class="case-log mp-only">Лобби: не подключено.</div>
+      <div id="coop-log" class="case-log">Сеть: не подключено.</div>
+
+      <div class="sound-row">
+        <label class="sound-upload">Свои звуки по ролям
+          <input id="sound-pack" type="file" accept="audio/*" multiple style="display:none" />
+        </label>
+        <button id="test-sounds" type="button">Тест звуков</button>
+      </div>
+      <div class="sound-roles">
+        <label>Shot <input id="snd-shot" type="file" accept="audio/*" /></label>
+        <label>Enemy Shot <input id="snd-enemy-shot" type="file" accept="audio/*" /></label>
+        <label>Step <input id="snd-step" type="file" accept="audio/*" /></label>
+        <label>Hit <input id="snd-hit" type="file" accept="audio/*" /></label>
+        <label>Death <input id="snd-death" type="file" accept="audio/*" /></label>
+        <label>Claw <input id="snd-claw" type="file" accept="audio/*" /></label>
+        <label>UI <input id="snd-ui" type="file" accept="audio/*" /></label>
+      </div>
+      <div id="sound-log" class="case-log">Звуки: базовые (можно загрузить свои).</div>
+
+      <div class="actions">
+        <button id="start" class="primary">Играть</button>
+      </div>
+    </div>
+
+    <div id="hud" class="hidden">
+      <div class="left">
+        <div>Здоровье: <span id="hp">100</span></div>
+        <div>Деньги: <span id="money">3200</span>$</div>
+        <div>Убийства: <span id="kills">0</span></div>
+        <div>Смерти: <span id="deaths">0</span></div>
+        <div>Оружие: <span id="weapon-label">AKR-12</span></div>
+      </div>
+      <div class="crosshair">+</div>
+      <div class="right">
+        <div>Время: <span id="time">00:00</span></div>
+        <div>Режим: <span id="mode-label">-</span></div>
+        <div>Статус: <span id="state">-</span></div>
+        <div>Точность: <span id="acc">0%</span></div>
+        <div>Счет: <span id="team-score">0 : 0</span></div>
+        <div id="mode-desc-hud">-</div>
+      </div>
+    </div>
+
+    <div id="hp-big" class="hp-big hidden">ЗДОРОВЬЕ 100</div>
+
+    <div id="scoreboard" class="scoreboard hidden">
+      <h3>Таблица (TAB)</h3>
+      <div id="score-content"></div>
+    </div>
+
+    <div id="pause" class="panel hidden small">
+      <h2>Пауза</h2>
+      <button id="resume" class="primary">Продолжить</button>
+      <button id="back">В меню</button>
+    </div>
+
+    <div id="buy" class="panel hidden small buy">
+      <h2>Закупка: <span id="buy-time">15</span>с</h2>
+      <div class="buy-grid">
+        <button class="buy-item" data-buy="rifle">AKR-12</button>
+        <button class="buy-item" data-buy="m4">M4A1</button>
+        <button class="buy-item" data-buy="smg">Vector</button>
+        <button class="buy-item" data-buy="shotgun">M590</button>
+        <button class="buy-item" data-buy="sniper">AWP</button>
+        <button class="buy-item" data-buy="lmg">M249</button>
+      </div>
+      <p id="buy-picked">Выбрано: AKR-12</p>
+      <button id="buy-close" class="primary">Готов</button>
+    </div>
+
+    <div id="death" class="panel hidden small">
+      <h2>Раунд окончен</h2>
+      <p id="death-text">-</p>
+      <button id="retry" class="primary">Заново</button>
+      <button id="menu-btn">В меню</button>
+    </div>
+
+    <div id="hint">WASD • SPACE • SHIFT (присесть) • ЛКМ • R • 1/2/3 • B • TAB • ESC</div>
+  </div>
+
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
+
